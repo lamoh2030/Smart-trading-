@@ -1,13 +1,4 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SMART TRADING</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f4f6fc;color:#18223a;font:15px Arial}header{padding:20px;background:linear-gradient(110deg,#245bff,#7045e8,#12b8b0);color:white;font-weight:bold;font-size:22px}main{max-width:850px;margin:24px auto;padding:0 15px}.box{background:white;padding:20px;border-radius:15px;margin:14px 0;border:1px solid #e3e8f1}h1{font-size:30px}h2{font-size:19px}input,select{display:block;width:100%;padding:12px;margin:7px 0 13px;border:1px solid #ccd5e5;border-radius:8px}button{padding:11px 15px;border:0;border-radius:8px;background:#245bff;color:white;font-weight:bold;margin:4px;cursor:pointer}.secondary{background:#eaf0ff;color:#245bff}.hidden{display:none!important}.muted{color:#68758d;font-size:13px;line-height:1.5}.status{color:#087e62;font-size:13px}.bad{color:#b83245}.address{overflow-wrap:anywhere;font-size:12px}.tabs{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0}.wallet{padding:12px;background:#f7f8fc;border-radius:10px;margin:8px 0}table{border-collapse:collapse;width:100%;font-size:12px}td,th{text-align:left;padding:8px;border-bottom:1px solid #e5eaf3;overflow-wrap:anywhere}@media(min-width:650px){.wallets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}}
-</style></head><body>
-<header>◆ SMART TRADING</header><main>
-<div class="box"><h1>Your trading activity, in one place.</h1><p class="muted">Register, submit deposits for review and view your account records.</p><p class="muted"><b>Risk notice:</b> Deposits are manually reviewed. This site does not automatically verify blockchain transfers or execute Binance trades. Returns are not guaranteed. Never share seed phrases or private keys.</p></div>
-<section id="auth" class="box"><h2>Account access</h2><div class="tabs"><button onclick="mode('login')">Log in</button><button class="secondary" onclick="mode('signup')">Create account</button></div>
-<form id="login" onsubmit="login(event)"><label>Email<input id="le" type="email" required></label><label>Password<input id="lp" type="password" required></label><button>Log in</button></form>
-<form id="signup" class="hidden" onsubmit="signup(event)"><label>Full name<input id="name" required></label><label>Email<input id="se" type="email" required></label><label>Password (8+ characters)<input id="sp" type="password" minlength="8" required></label><label>Referral code (optional)<input id="ref"></label><button>Create account</button></form>
 <form id="verify" class="hidden" onsubmit="verify(event)"><p class="muted">Enter the six-digit code sent to your email. If Supabase sends a confirmation link instead, use that link.</p><label>Email<input id="ve" type="email" required></label><label>Six-digit code<input id="vt" inputmode="numeric" maxlength="6" required></label><button>Verify email</button></form><p id="authmsg" class="status"></p></section>
 <section id="dashboard" class="hidden">
 <div class="box"><span id="who"></span><button class="secondary" onclick="logout()">Log out</button><h2>Dashboard</h2><p>Referral code: <b id="rcode"></b> <button class="secondary" onclick="copyRef()">Copy</button><br>Approved deposits: <b id="total">$0.00</b> · Trade P/L: <b id="pnl">$0.00</b></p></div>
@@ -15,7 +6,37 @@
 <div id="dep" class="box"><h2>Deposit networks</h2><div class="wallets">
 <div class="wallet"><b>USDT · TRON (TRC20)</b><p class="address" id="tron">TEDtgPcU3mfe2aYymaUtVkCzsc6N4TCuRv</p><button class="secondary" onclick="copy('tron')">Copy</button></div>
 <div class="wallet"><b>BNB Smart Chain (BEP20)</b><p class="address" id="bep">0x1606702e91d06692efe611d90254049926aa4083</p><button class="secondary" onclick="copy('bep')">Copy</button></div>
-<div class="wallet"><b>Solana (SOL)</b><p class="address" id="sol">EDZyijce2kbAcCGh6ow6Q3gHsrHkrspj4afms9d2fXCa</p><button class="secondary" onclick="copy('sol')">Copy</button></div></div>
+<div class="wallet"><b>Solana (SOL)</b><p class="address" id="sol">EDZyijce2kbAcCGh6ow6Q3gHsrHkrspj4afms9d2fXCa</p><button class="secondary" onclick="copy('sol')">Copy</button></div></div>async function signup(e){
+  e.preventDefault();
+  say('authmsg','Creating account…');
+
+  try {
+    const email = el('se').value.trim();
+    const password = el('sp').value;
+    const full_name = el('name').value.trim();
+    const referral_code = el('ref').value.trim().toUpperCase() || null;
+
+    const {data,error} = await db.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {full_name, referral_code}
+      }
+    });
+
+    if(error) {
+      say('authmsg',error.message,true);
+      return;
+    }
+
+    el('ve').value = email;
+    mode('verify');
+    say('authmsg','Account created. Check your email for the verification code.');
+
+  } catch(err) {
+    say('authmsg','Registration failed: '+err.message,true);
+  }
+}
 <p class="muted">Confirm the exact asset and network before sending. Incorrect transfers may be irreversible.</p>
 <form onsubmit="deposit(event)"><div class="two"><label>Amount USD<input id="da" type="number" min="1" step=".01" required></label><label>Network<select id="dn" required><option value="">Choose</option><option value="TRC20">TRC20</option><option value="BEP20">BEP20</option><option value="SOL">SOL</option></select></label></div><label>Transaction hash<input id="dh" required></label><button>Submit deposit for review</button></form><p id="dmsg" class="status"></p></div>
 <div id="wd" class="box hidden"><h2>Withdrawal request</h2><p class="muted">Requests are subject to manual review. Submission does not guarantee payment.</p><form onsubmit="withdraw(event)"><label>Amount USD<input id="wa" type="number" min="1" step=".01" required></label><label>Wallet address and network<input id="wdetails" required></label><button>Submit request</button></form><p id="wmsg" class="status"></p></div>
