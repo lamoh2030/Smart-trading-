@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101b46">
+<title>SMART TRADING</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#101b46;--blue:#315bff;--purple:#7547e8;--cyan:#19c5d8;--green:#0da879;--ink:#18213c;--muted:#69738d;--bg:#f4f7ff;--line:#e5eaf5;--white:#fff;--red:#d83d56}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer;border:0}
+.top{background:linear-gradient(115deg,#101b46,#293e9a 58%,#7547e8);color:#fff;padding:24px 18px 32px}
+.wrap{max-width:1100px;margin:auto}.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.5px;font-size:20px}.logo{height:39px;width:39px;border-radius:13px;background:linear-gradient(135deg,#22d3ee,#6c63ff);display:grid;place-items:center;font-weight:900}
+.top p{color:#d9e1ff;margin:8px 0 0}.main{max-width:1100px;margin:-14px auto 50px;padding:0 16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 12px 32px #1a2b5610;margin-bottom:18px}
+h1,h2,h3,p{margin-top:0}h1{font-size:26px;margin-bottom:5px}h2{font-size:19px;margin-bottom:14px}h3{font-size:15px}
+.muted{color:var(--muted)}.small{font-size:12px}.hidden{display:none!important}
+.authgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.feature{background:linear-gradient(145deg,#edf2ff,#f7f3ff);border-radius:16px;padding:22px}.feature h2{font-size:25px;line-height:1.2}.pill{display:inline-block;background:#e9edff;color:#3854d8;padding:5px 10px;border-radius:30px;font-size:12px;font-weight:800}
+.tabs{display:flex;gap:8px;margin-bottom:16px}.tab{padding:9px 14px;border-radius:10px;background:#f0f3fb;color:#53607c;font-weight:700}.tab.active{background:#e9edff;color:#304fd4}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}input,select{width:100%;padding:12px 13px;border:1px solid #dce3f0;border-radius:10px;background:#fff;outline:none;color:var(--ink)}input:focus,select:focus{border-color:#637dff;box-shadow:0 0 0 3px #637dff1c}
+.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;background:linear-gradient(100deg,var(--blue),var(--purple));color:white;padding:12px 17px;border-radius:11px;font-weight:800;width:100%;margin-top:16px}.btn:disabled{opacity:.6;cursor:wait}.btn.secondary{background:#edf1ff;color:#314fd0}.btn.danger{background:#fff0f2;color:#b52d48}.msg{margin-top:12px;padding:10px 12px;border-radius:10px;background:#eff5ff;color:#304caa;overflow-wrap:anywhere}.msg.error{background:#fff0f1;color:#b52d48}.msg:empty{display:none}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.nav button{background:#edf1fa;color:#46516e;padding:9px 13px;border-radius:10px;font-weight:700}.nav button.active{background:#253d9a;color:white}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.stat{padding:17px;border-radius:15px;background:linear-gradient(145deg,#f0f4ff,#faf9ff);border:1px solid #e5eaff}.stat span{font-size:12px;color:var(--muted)}.stat strong{display:block;font-size:24px;margin-top:6px;overflow-wrap:anywhere}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:15px}.wallet{padding:14px;border:1px solid var(--line);border-radius:13px;margin:10px 0;overflow-wrap:anywhere}.wallet code{font-size:12px;word-break:break-all}.copy{background:#edf1ff;color:#304fd4;border-radius:8px;padding:7px 10px;font-weight:700;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:#66718c;background:#f8f9fd} .tablewrap{overflow-x:auto}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}.notice{padding:12px;border-radius:12px;background:#fff8e8;color:#805d12;font-size:13px}
+@media(max-width:720px){.authgrid,.two{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.top{padding-bottom:25px}.panel{padding:17px}.main{padding:0 12px}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><div class="brand"><div class="logo">ST</div> SMART TRADING</div><p>A simple account dashboard for deposits, trade records and withdrawal requests.</p></div></header>
+<main class="main">
+<section id="authView" class="authgrid">
+  <div class="feature panel">
+    <span class="pill">SMART TRADING PORTAL</span>
+    <h2>Manage your trading account in one place.</h2>
+    <p class="muted">Create an account, verify your email and access your personal dashboard.</p>
+    <hr>
+    <p>• Personal account dashboard</p><p>• Deposit submission for manual review</p><p>• Trade and withdrawal history</p><p>• Referral code display</p>
+    <div class="notice">Trading involves risk. Returns are not guaranteed. Do not send funds until the platform's payment and custody arrangements have been independently verified.</div>
+  </div>
+  <div class="panel">
+    <div class="tabs"><button class="tab active" id="tabSignup" type="button" onclick="showAuth('signup')">Create account</button><button class="tab" id="tabLogin" type="button" onclick="showAuth('login')">Log in</button></div>
+    <form id="signupForm">
+      <h2>Create your account</h2>
+      <label for="fullName">Full name</label><input id="fullName" autocomplete="name" required>
+      <label for="signupEmail">Email address</label><input id="signupEmail" type="email" autocomplete="email" required>
+      <label for="signupPassword">Password</label><input id="signupPassword" type="password" minlength="6" autocomplete="new-password" required>
+      <label for="referralInput">Referral code (optional)</label><input id="referralInput" placeholder="Enter referral code">
+      <button class="btn" id="signupBtn" type="submit">Create account</button>
+    </form>
+    <form id="verifyForm" class="hidden">
+      <h2>Verify your email</h2><p class="muted">Enter the 6-digit code sent to your email.</p>
+      <label for="verifyEmail">Email address</label><input id="verifyEmail" type="email" required>
+      <label for="verifyToken">6-digit verification code</label><input id="verifyToken" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required>
+      <button class="btn" id="verifyBtn" type="submit">Verify email</button>
+      <button class="btn secondary" type="button" onclick="showAuth('signup')">Back to registration</button>
+    </form>
+    <form id="loginForm" class="hidden">
+      <h2>Welcome back</h2>
+      <label for="loginEmail">Email address</label><input id="loginEmail" type="email" autocomplete="email" required>
+      <label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required>
+      <button class="btn" id="loginBtn" type="submit">Log in</button>
+    </form>
+    <div id="authMsg" class="msg" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="appView" class="hidden">
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h1>My dashboard</h1><div class="muted small" id="welcomeEmail"></div></div><button class="btn secondary" style="width:auto;margin:0" id="logoutBtn">Log out</button></div>
+    <div class="nav" style="margin-top:18px"><button class="active" data-page="overview">Overview</button><button data-page="deposit">Deposit</button><button data-page="withdraw">Withdraw</button><button data-page="history">History</button><button data-page="referrals">Referrals</button><button id="adminNav" class="hidden" data-page="admin">Admin</button></div>
+    <div id="appMsg" class="msg"></div>
+    <section class="page" id="page-overview">
+      <div class="cards"><div class="stat"><span>Approved deposits (USD)</span><strong id="totalDeposits">$0.00</strong></div><div class="stat"><span>Recorded trade P/L (USD)</span><strong id="totalPnl">$0.00</strong></div><div class="stat"><span>Account status</span><strong style="font-size:18px">Active</strong></div></div>
+      <p class="muted small" style="margin-top:14px">These figures show records stored in this portal. They are not proof of available cash or a withdrawable balance.</p>
+    </section>
+    <section class="page hidden" id="page-deposit">
+      <h2>Submit a deposit</h2><p class="muted">Send no funds until the receiving wallet and payment process have been independently verified. Submit transaction details for manual review.</p>
+      <div class="two">
+        <div>
+          <div class="wallet"><b>TRON / TRC20</b><p><code id="walletTron">TEDtgPcU3mfe2aYymaUtVkCzsc6N4TCuRv</code></p><button class="copy" type="button" onclick="copyText('walletTron')">Copy address</button></div>
+          <div class="wallet"><b>EVM / BEP20</b><p><code id="walletEvm">0x1606702e91d06692efe611d90254049926aa4083</code></p><button class="copy" type="button" onclick="copyText('walletEvm')">Copy address</button></div>
+          <div class="wallet"><b>Solana / SOL</b><p><code id="walletSol">EDZyijce2kbAcCGh6ow6Q3gHsrHkrspj4afms9d2fXCa</code></p><button class="copy" type="button" onclick="copyText('walletSol')">Copy address</button></div>
+        </div>
+        <form id="depositForm">
+          <label for="depositAmount">Amount (USD)</label><input id="depositAmount" type="number" min="1" step="0.01" required>
+          <label for="depositNetwork">Network</label><select id="depositNetwork" required><option value="">Choose network</option><option>TRON / TRC20</option><option>EVM / BEP20</option><option>Solana / SOL</option></select>
+          <label for="depositHash">Transaction hash / signature</label><input id="depositHash" required>
+          <button class="btn" id="depositBtn">Submit for review</button>
+        </form>
+      </div>
+    </section>
+    <section class="page hidden" id="page-withdraw">
+      <h2>Withdrawal request</h2><div class="notice">A request is not a payment. Requests require manual review and a separately verified payout process.</div>
+      <form id="withdrawForm" style="max-width:560px">
+        <label for="withdrawAmount">Amount (USD)</label><input id="withdrawAmount" type="number" min="1" step="0.01" required>
+        <label for="withdrawDetails">Payout details</label><input id="withdrawDetails" placeholder="Enter payout method and destination" required>
+        <button class="btn" id="withdrawBtn">Submit withdrawal request</button>
+      </form>
+    </section>
+    <section class="page hidden" id="page-history"><h2>Account history</h2><h3>Deposits</h3><div id="depositHistory" class="tablewrap muted">Loading…</div><hr><h3>Trades</h3><div id="tradeHistory" class="tablewrap muted">Loading…</div><hr><h3>Withdrawals</h3><div id="withdrawHistory" class="tablewrap muted">Loading…</div><hr><h3>Referral commissions</h3><div id="commissionHistory" class="tablewrap muted">Loading…</div></section>
+    <section class="page hidden" id="page-referrals"><h2>My referral code</h2><p class="muted">Share this code with people you invite. Commission calculations are not automated in this version.</p><div class="wallet"><b id="referralCode">Loading…</b><br><button class="copy" type="button" onclick="copyReferral()">Copy referral code</button></div></section>
+    <section class="page hidden" id="page-admin"><h2>Admin review</h2><p class="muted">Only accounts whose profile role is set to admin can access this section.</p><h3>Pending deposits</h3><div id="pendingDeposits" class="muted">Loading…</div><hr><h3>Record a trade</h3><form id="tradeForm" class="two">
+      <div><label for="tradeUser">User UUID</label><input id="tradeUser" required><label for="tradeAsset">Asset</label><input id="tradeAsset" placeholder="BTC/USDT" required><label for="tradeType">Trade type</label><select id="tradeType"><option>BUY</option><option>SELL</option></select></div>
+      <div><label for="tradeAmount">Amount (USD)</label><input id="tradeAmount" type="number" min="0.01" step="0.01" required><label for="tradePnl">Profit / loss (USD)</label><input id="tradePnl" type="number" step="0.01" required><button class="btn" id="tradeBtn">Save trade record</button></div>
+    </form></section>
+  </div>
+</section>
+</main>
+<script>
+'use strict';
+const SUPABASE_URL = 'https://eimekgiuholthajlzspd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_3eLRu7SvLaPlA0tWb1eepg_4-evkc8m';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let currentUser = null;
+let currentProfile = null;
+const $ = id => document.getElementById(id);
+const money = value => '$' + Number(value || 0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function message(id,text,isError=false){const node=$(id);node.textContent=text||'';node.classList.toggle('error',!!isError);}
+function setBusy(id,busy,label){const b=$(id);b.disabled=busy;if(label)b.textContent=busy?'Please wait…':label;}
+function showAuth(which){
+  $('signupForm').classList.toggle('hidden',which!=='signup');
+  $('loginForm').classList.toggle('hidden',which!=='login');
+  $('verifyForm').classList.add('hidden');
+  $('tabSignup').classList.toggle('active',which==='signup');
+  $('tabLogin').classList.toggle('active',which==='login');
+  message('authMsg','');
+}
+function showVerify(email){
+  $('signupForm').classList.add('hidden');$('loginForm').classList.add('hidden');$('verifyForm').classList.remove('hidden');
+  $('verifyEmail').value=email;$('tabSignup').classList.remove('active');$('tabLogin').classList.remove('active');
+}
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  $('page-'+page).classList.remove('hidden');
+  document.querySelectorAll('.nav [data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  if(page==='history')loadHistory();
+  if(page==='admin')loadAdmin();
+}
+document.querySelectorAll('.nav [data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+$('signupForm').addEventListener('submit',async e=>{
+  e.preventDefault();message('authMsg','');setBusy('signupBtn',true);
+  try{
+    const email=$('signupEmail').value.trim();
+    const password=$('signupPassword').value;
+    const full_name=$('fullName').value.trim();
+    const referral_code=$('referralInput').value.trim().toUpperCase()||null;
+    const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name,referral_code}}});
+    if(error)throw error;
+    if(data.session){await enterApp(data.user);return;}
+    showVerify(email);message('authMsg','Account request submitted. Check your email for the 6-digit verification code.');
+  }catch(err){message('authMsg',err.message||'Could not create account. Please try again.',true);}
+  finally{setBusy('signupBtn',false,'Create account');}
+});
+$('verifyForm').addEventListener('submit',async e=>{
+  e.preventDefault();message('authMsg','');setBusy('verifyBtn',true);
+  try{
+    const {data,error}=await db.auth.verifyOtp({email:$('verifyEmail').value.trim(),token:$('verifyToken').value.trim(),type:'signup'});
+    if(error)throw error;
+    if(data.user){$('loginEmail').value=$('verifyEmail').value.trim();showAuth('login');message('authMsg','Email verified. Please log in.');}
+  }catch(err){message('authMsg',err.message||'Email verification failed.',true);}
+  finally{setBusy('verifyBtn',false,'Verify email');}
+});
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();message('authMsg','');setBusy('loginBtn',true);
+  try{const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;await enterApp(data.user);}
+  catch(err){message('authMsg',err.message||'Login failed.',true);}
+  finally{setBusy('loginBtn',false,'Log in');}
+});
+async function enterApp(user){
+  currentUser=user;
+
+  // A successful Supabase sign-in should not be blocked just because
+  // the matching profile row is missing or temporarily unreadable.
+  let profile = null;
+  const {data, error} = await db.from('profiles')
+    .select('*').eq('id', user.id).maybeSingle();
+
+  if (!error && data) {
+    profile = data;
+  } else {
+    profile = {
+      id: user.id,
+      email: user.email || '',
+      full_name: user.user_metadata?.full_name || '',
+      referral_code: null,
+      role: 'user'
+    };
+    if (error) {
+      console.warn('Profile lookup issue:', error.message);
+    }
+  }
+
+  currentProfile = profile;
+  $('authView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  $('welcomeEmail').textContent = user.email || '';
+  $('referralCode').textContent = profile.referral_code || 'Not assigned';
+  $('adminNav').classList.toggle('hidden', profile.role !== 'admin');
+
+  await loadMetrics();
+  showPage('overview');
+}
+async function loadMetrics(){
+  const [d,t]=await Promise.all([
+    db.from('deposits').select('amount').eq('user_id',currentUser.id).eq('status','approved'),
+    db.from('trades').select('profit_loss').eq('user_id',currentUser.id)
+  ]);
+  if(d.error)message('appMsg','Deposit summary: '+d.error.message,true);
+  $('totalDeposits').textContent=money((d.data||[]).reduce((s,x)=>s+Number(x.amount||0),0));
+  $('totalPnl').textContent=money((t.data||[]).reduce((s,x)=>s+Number(x.profit_loss||0),0));
+}
+function escapeHtml(v){return String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function table(rows,cols){if(!rows||!rows.length)return '<p class="muted">No records yet.</p>';return '<table><thead><tr>'+cols.map(c=>'<th>'+c[1]+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+escapeHtml(r[c[0]])+'</td>').join('')+'</tr>').join('')+'</tbody></table>';}
+async function loadHistory(){
+  const jobs=[
+    ['depositHistory','deposits','amount,network,status,transaction_hash',[['amount','USD'],['network','Network'],['status','Status'],['transaction_hash','Transaction hash']]],
+    ['tradeHistory','trades','asset,trade_type,amount,profit_loss',[['asset','Asset'],['trade_type','Type'],['amount','Amount'],['profit_loss','P/L']]],
+    ['withdrawHistory','withdrawal_requests','amount,status,payment_details',[['amount','USD'],['status','Status'],['payment_details','Payout details']]],
+    ['commissionHistory','referral_commissions','level,amount,status',[['level','Level'],['amount','USD'],['status','Status']]]
+  ];
+  await Promise.all(jobs.map(async ([target,tableName,fields,cols])=>{
+    const key=tableName==='referral_commissions'?'beneficiary_id':'user_id';
+    const {data,error}=await db.from(tableName).select(fields).eq(key,currentUser.id);
+    $(target).innerHTML=error?escapeHtml(error.message):table(data,cols);
+  }));
+}
+$('depositForm').addEventListener('submit',async e=>{
+  e.preventDefault();message('appMsg','');setBusy('depositBtn',true);
+  try{const amount=Number($('depositAmount').value);if(!(amount>0))throw new Error('Enter a valid amount.');
+    const {error}=await db.from('deposits').insert({user_id:currentUser.id,amount,network:$('depositNetwork').value,transaction_hash:$('depositHash').value.trim()});
+    if(error)throw error;e.target.reset();message('appMsg','Deposit details submitted for manual review.');}
+  catch(err){message('appMsg',err.message,true);}finally{setBusy('depositBtn',false,'Submit for review');}
+});
+$('withdrawForm').addEventListener('submit',async e=>{
+  e.preventDefault();message('appMsg','');setBusy('withdrawBtn',true);
+  try{const amount=Number($('withdrawAmount').value);if(!(amount>0))throw new Error('Enter a valid amount.');
+    const {error}=await db.from('withdrawal_requests').insert({user_id:currentUser.id,amount,payment_details:$('withdrawDetails').value.trim()});
+    if(error)throw error;e.target.reset();message('appMsg','Withdrawal request submitted for review.');}
+  catch(err){message('appMsg',err.message,true);}finally{setBusy('withdrawBtn',false,'Submit withdrawal request');}
+});
+async function loadAdmin(){
+  if(!currentProfile||currentProfile.role!=='admin'){message('appMsg','Admin access is not enabled for this account.',true);return;}
+  const {data,error}=await db.from('deposits').select('id,user_id,amount,network,transaction_hash').eq('status','pending').order('created_at',{ascending:true});
+  if(error){$('pendingDeposits').textContent=error.message;return;}
+  $('pendingDeposits').innerHTML=(data||[]).map(d=>`<div class="wallet"><b>${money(d.amount)} · ${escapeHtml(d.network)}</b><p class="small muted">User: ${escapeHtml(d.user_id)}<br>Transaction: ${escapeHtml(d.transaction_hash)}</p><button class="copy" type="button" onclick="reviewDeposit('${d.id}','approved')">Approve</button> <button class="copy" type="button" onclick="reviewDeposit('${d.id}','rejected')">Reject</button></div>`).join('')||'No pending deposits.';
+}
+async function reviewDeposit(id,status){
+  message('appMsg','');
+  try{const {error}=await db.rpc('admin_review_deposit',{deposit_id:id,new_status:status});if(error)throw error;message('appMsg','Deposit marked '+status+'.');await loadAdmin();await loadMetrics();}
+  catch(err){message('appMsg','Review failed: '+err.message,true);}
+}
+$('tradeForm').addEventListener('submit',async e=>{
+  e.preventDefault();message('appMsg','');setBusy('tradeBtn',true);
+  try{
+    const {error}=await db.rpc('admin_add_trade',{p_user_id:$('tradeUser').value.trim(),p_asset:$('tradeAsset').value.trim(),p_trade_type:$('tradeType').value,p_amount:Number($('tradeAmount').value),p_profit_loss:Number($('tradePnl').value)});
+    if(error)throw error;e.target.reset();message('appMsg','Trade record saved.');
+  }catch(err){message('appMsg','Could not save trade: '+err.message,true);}
+  finally{setBusy('tradeBtn',false,'Save trade record');}
+});
+$('logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();location.reload();});
+async function copyText(id){try{await navigator.clipboard.writeText($(id).textContent);message('appMsg','Address copied.');}catch(e){message('appMsg','Copy unavailable. Select and copy the address manually.',true);}}
+async function copyReferral(){try{await navigator.clipboard.writeText(currentProfile.referral_code||'');message('appMsg','Referral code copied.');}catch(e){message('appMsg','Select and copy your referral code manually.',true);}}
+db.auth.getSession().then(async ({data,error})=>{if(error){message('authMsg',error.message,true);return;}if(data.session)await enterApp(data.session.user);});
+</script>
+</body>
+</html>
